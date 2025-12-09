@@ -1,12 +1,14 @@
 Start-Transcript -Path "$PSScriptRoot\transcript.txt" -Force
 
 # Imports the CSV file with the list of domain lists to process
-if (test-path "$PSScriptRoot\DomainLists.csv") {    
+if (test-path "$PSScriptRoot\SubscriptionLists.csv") {    
     $DomainLists = Import-Csv -Path "$PSScriptRoot\SubscriptionLists.csv"
 } else {
     Write-Host "[ERROR] DomainLists.csv not found in '$PSScriptRoot'" -ForegroundColor Red
     exit
 }
+
+$GitHubPush = $false
 
 ForEach($DomainList in $DomainLists){        
     Write-Host "`nProcessing list: $($DomainList.name)" -ForegroundColor Cyan
@@ -29,13 +31,13 @@ ForEach($DomainList in $DomainLists){
             if ($continue){
                 SaveDomains -ExtractedDomains $ExtractedDomains -FilePath "$PSScriptRoot\$($DomainList.name).txt"
                 $GitHubPush = $true
-            } else {
-                $GitHubPush = $false
             }
         }
     }    
 }
 
-GithubPush
+if ($GitHubPush){
+    GithubPush
+}
 
 Stop-Transcript
